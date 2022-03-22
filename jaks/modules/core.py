@@ -4,7 +4,7 @@ from jax.random import PRNGKey
 
 from collections import OrderedDict
 import inspect
-from typing import Tuple, Union, Callable
+from typing import Tuple, Union
 
 
 class Module:
@@ -44,7 +44,7 @@ class Module:
             x = getattr(self, name)(params, x)
         return x
 
-    def compile(self, batch: bool = True) -> Callable:
+    def compile(self, batch: bool = True):
         @jax.jit
         def forward(params, *args, **kwargs):
             return self(params, *args, **kwargs)
