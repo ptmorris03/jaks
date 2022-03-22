@@ -51,5 +51,5 @@ class Module:
         if batch:
             arg_count = len(inspect.signature(self.forward).parameters) - 1
             in_axes = [None] + [0] * arg_count
-            forward = jax.vmap(forward, in_axes=in_axes)
+            return jax.vmap(forward, in_axes=in_axes)
         return forward
