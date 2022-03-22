@@ -8,9 +8,9 @@ setuptools.setup(
     description='jaks',
     long_description='jaks',
     long_description_content_type="text/markdown",
-    url='https://github.com/ptmorris03/jax_workbench',
+    url='https://github.com/ptmorris03/jaks',
     project_urls = {
-        "Bug Tracker": "https://github.com/ptmorris03/jax_workbench/issues"
+        "Bug Tracker": "https://github.com/ptmorris03/jaks/issues"
     },
     license='to kill',
     packages=['jaks', 'jaks.modules'],
