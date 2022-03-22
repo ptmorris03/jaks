@@ -1,4 +1,4 @@
-# jax_workbench
+# jaks
 ```bash 
 pip install git+https://github.com/ptmorris03/jaks.git
 ```
