@@ -54,7 +54,7 @@ class ResidualGate(nn.Module):
         return gated_output + x
         
         
-mlp = MLP([784, 128, 10])
+mlp = MLP([784, 128, 1])
 mlp_fn = mlp.compile(batch=True)
 key, params = mlp_fn.init(key=42)
 x = jnp.ones((32, 784))
