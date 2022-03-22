@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from typing import Iterable
 
 import jax
+import jax.numpy as jnp
+
 import jaks
 import jaks.modules as nn
 
@@ -22,7 +24,7 @@ class Linear(nn.Module):
 
 
 @dataclass
-class MLP(Module):
+class MLP(nn.Module):
     dims: Iterable[int]
     act_module: Module = nn.RELU()
     
