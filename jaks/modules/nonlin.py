@@ -37,6 +37,6 @@ class ScaledDotProductAttention(Module):
         ) -> jnp.ndarray:
 
         scale = 1 / jnp.sqrt(key.shape[-1])
-        dot_prod = jnp.matmul(key, query)
+        dot_prod = jnp.matmul(query, key.T)
         attn = jax.nn.softmax(jnp.multiply(dot_prod, scale))
         return jnp.matmul(attn, value)
