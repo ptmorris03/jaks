@@ -15,7 +15,7 @@ class Residual(Module):
     def modules(self):
         try:
             for i, m in enumerate(self.module):
-                yield "residual_module{i+1}", m
+                yield F"residual_module{i+1}", m
         except TypeError:
             yield "residual_module1", self.module
 
