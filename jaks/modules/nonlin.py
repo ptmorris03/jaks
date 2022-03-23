@@ -25,3 +25,18 @@ class ZScore(Module):
         mean = x.mean(axis=-1, keepdims=True)
         std = x.std(axis=-1, keepdims=True) + self.epsilon
         return (x - mean) / std
+
+
+class ScaledDotProductAttention(Module):
+    def forward(
+        self, 
+        params: Any, 
+        query: jnp.ndarray, 
+        key: jnp.ndarray, 
+        value: jnp.ndarray
+        ) -> jnp.ndarray:
+
+        scale = jnp.sqrt(key.shape[-1])
+        dot_prod = jnp.matmul(key, query)
+        attn = jax.nn.softmax(dot_prod / scale)
+        return jnp.matmul(attn, value)
