@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Iterable
 
+import jax
 import jax.numpy as jnp
 
 from .core import Module
