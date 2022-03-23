@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Any, Iterable
 
+import jax.numpy as jnp
+
 from .core import Module
 from .nonlin import RELU, ZScore, ScaledDotProductAttention
 from .transform import Rotate, Translate, Scale
