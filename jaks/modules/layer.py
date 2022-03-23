@@ -56,7 +56,7 @@ class MultiHeadAttention(Module):
 
         qkv_fn = jax.vmap(self.qkv, in_axes=(None, 0))
         attn_fn = jax.vmap(self.attention, in_axes=(None, 0, 0, 0))
-        attn_fn = jax.vmap(self.attention, in_axes=(None, 0, 0, 0))
+        attn_fn = jax.vmap(attn_fn, in_axes=(None, 0, 0, 0))
         out_fn = jax.vmap(self.out, in_axes=(None, 0))
 
         qkv = qkv_fn(params, x)
