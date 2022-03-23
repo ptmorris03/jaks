@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Any, Iterable
 
 from .core import Module
 from .nonlin import RELU, ZScore, ScaledDotProductAttention
