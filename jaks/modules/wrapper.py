@@ -13,18 +13,20 @@ class Residual(Module):
     module: Union[Module, Iterable[Module]]
 
     def modules(self):
-        if type(self.module) is Module:
-            self.module = [self.module]
-        for i, m in enumerate(self.module):
-            yield "residual_module{i+1}", m
+        try:
+            for i, m in enumerate(self.module):
+                yield "residual_module{i+1}", m
+        except TypeError:
+            yield "residual_module1", self.module
 
     def forward(self, params: OrderedDict, x: jnp.ndarray) -> jnp.ndarray:
-        y = x
-        if type(self.module) is Module:
-            self.module = [self.module]
-        for i, m in enumerate(self.module):
-            y = getattr(self, F"residual_module{i+1}")(params, y)
-        return y + x
+        try:
+            y = x
+            for i, m in enumerate(self.module):
+                y = getattr(self, F"residual_module{i+1}")(params, y)
+            return y + x
+        except TypeError:
+            return self.residual_module1(params, x) + x
 
 
 @dataclass
