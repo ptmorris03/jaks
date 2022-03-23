@@ -47,10 +47,14 @@ class MultiHeadAttention(Module):
     heads: int
     head_dim_scale: float = 1.0
     bias: bool = True
+    prenorm: bool = True
 
     def modules(self):
         head_dims = int(round(self.dims * self.head_dim_scale / self.heads))
         module = Linear if self.bias else Rotate
+
+        if self.prenorm:
+            yield "layernorm", LayerNorm(self.dims)
 
         yield "qkv", module(self.dims, 3 * self.heads * head_dims)
         yield "attention", ScaledDotProductAttention()
@@ -59,11 +63,13 @@ class MultiHeadAttention(Module):
     def forward(self, params: Any, x: jnp.ndarray) -> jnp.ndarray:
         head_dims = int(round(self.dims * self.head_dim_scale / self.heads))
 
+        pre_fn = jax.vmap(self.layernorm, in_axes=(None, 0))
         qkv_fn = jax.vmap(self.qkv, in_axes=(None, 0))
         attn_fn = jax.vmap(self.attention, in_axes=(None, 1, 1, 1))
         #attn_fn = jax.vmap(attn_fn, in_axes=(None, 0, 0, 0))
         out_fn = jax.vmap(self.out, in_axes=(None, 0))
 
+        x = pre_fn(params, x)
         qkv = qkv_fn(params, x)
         qkv = qkv.reshape(qkv.shape[0], 3, self.heads, head_dims)
         query, key, value = qkv[:,0], qkv[:,1], qkv[:,2]
