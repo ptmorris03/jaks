@@ -20,6 +20,8 @@ class Residual(Module):
 
     def forward(self, params: OrderedDict, x: jnp.ndarray) -> jnp.ndarray:
         y = x
+        if type(self.module) is Module:
+            self.module = [self.module]
         for i, m in enumerate(self.module):
             y = getattr(self, F"residual_module{i+1}")(params, y)
         return y + x
