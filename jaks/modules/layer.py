@@ -46,13 +46,15 @@ class MultiHeadAttention(Module):
     dims: int
     heads: int
     head_dim_scale: float = 1.0
+    bias: bool = True
 
     def modules(self):
         head_dims = int(round(self.dims * self.head_dim_scale / self.heads))
+        module = Linear if self.bias else Rotate
 
-        yield "qkv", Rotate(self.dims, 3 * self.heads * head_dims)
+        yield "qkv", module(self.dims, 3 * self.heads * head_dims)
         yield "attention", ScaledDotProductAttention()
-        yield "out", Rotate(self.heads * head_dims, self.dims)
+        yield "out", module(self.heads * head_dims, self.dims)
 
     def forward(self, params: Any, x: jnp.ndarray) -> jnp.ndarray:
         head_dims = int(round(self.dims * self.head_dim_scale / self.heads))
