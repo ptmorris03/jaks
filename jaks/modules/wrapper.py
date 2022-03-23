@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from dataclasses import dataclass
+from typing import Iterable, Union
 
 import jax
 import jax.numpy as jnp
@@ -9,13 +10,19 @@ from .core import Module
 
 @dataclass
 class Residual(Module):
-    module: Module
+    module: Union[Module, Iterable[Module]]
 
     def modules(self):
-        yield "residual_module", self.module
+        if type(self.module) is Module:
+            self.module = [self.module]
+        for i, m in enumerate(self.module):
+            yield "residual_module{i+1}", m
 
     def forward(self, params: OrderedDict, x: jnp.ndarray) -> jnp.ndarray:
-        return self.residual_module(params, x) + x
+        y = x
+        for i, m in enumerate(self.module):
+            y = getattr(self, F"residual_module{i+1}")(params, y)
+        return y + x
 
 
 @dataclass
