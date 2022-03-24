@@ -27,6 +27,19 @@ class Residual(Module):
             return y + x
         except TypeError:
             return self.residual_module1(params, x) + x
+        
+        
+@dataclass
+class Vmap(Module):
+    module: Module
+    in_axes = (None, 0)
+    out_axes = 0
+    
+    def modules(self):
+        yield "module", self.module
+    
+    def forward(self, params: OrderedDict, *args **kwargs):
+        return jax.vmap(self.module, in_axes=self.in_axes, out_axes=self.out_axes)(params, *args, **kwargs)
 
 
 @dataclass
