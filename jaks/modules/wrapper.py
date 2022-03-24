@@ -38,7 +38,7 @@ class Vmap(Module):
     def modules(self):
         yield "module", self.module
     
-    def forward(self, params: OrderedDict, *args **kwargs):
+    def forward(self, params: OrderedDict, *args, **kwargs):
         return jax.vmap(self.module, in_axes=self.in_axes, out_axes=self.out_axes)(params, *args, **kwargs)
 
 
