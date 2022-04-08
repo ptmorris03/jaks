@@ -1,8 +1,22 @@
 import jax
 import jax.numpy as jnp
+from jaxlib.xla_extension import DeviceArray
 
 from collections import OrderedDict
 import json
+from typing import Union
+
+
+class PRNGSplitter:
+    def __init__(self, seed: Union[int, DeviceArray]):
+        self.key = seed
+
+        if type(self.key) is int:
+            self.key = jax.random.PRNGKey(self.key)
+
+    def __call__(self):
+        self.key, key2 = jax.random.split(self.key)
+        return key2
 
 
 def pretty_params(params: OrderedDict, indent: int = 4) -> str:
