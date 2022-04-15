@@ -4,7 +4,7 @@ from jax.random import PRNGKey
 
 from collections import OrderedDict
 import inspect
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 
 class Module:
@@ -17,8 +17,11 @@ class Module:
     def init(
         self, 
         key: Union[int, PRNGKey], 
-        params: OrderedDict = OrderedDict()
+        params: Optional[OrderedDict] = None
         )-> Tuple[PRNGKey, OrderedDict]:
+        
+        if params is None:
+            params = OrderedDict()
 
         if type(key) is int:
             key = jax.random.PRNGKey(key)
