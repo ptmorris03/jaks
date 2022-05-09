@@ -45,6 +45,12 @@ def layernorm(x, weight, bias):
 def random_init(random_key, shape):
     return jax.random.normal(random_key, shape) * sqrt(2 / shape[-1])
 
+def linear_params(random_key, in_dims, out_dims, name=""):
+    return [
+        (F"linear_w{name}", random_init(random_key, (out_dims, in_dims))),
+        (F"linear_b{name}", jnp.zeros(out_dims))
+    ]
+
 
 @dataclass
 class MLP(nn.Module):
@@ -55,12 +61,12 @@ class MLP(nn.Module):
         next_key = jaks.utils.PRNGSplitter(random_key)
 
         for i, (d_in, d_out) in enumerate(zip(self.dims[:-1], self.dims[1:])):
-            yield F"weight{i}", random_init(next_key(), (d_out, d_in))
-            yield F"bias{i}", jnp.zeros(d_out)
+            for name, array in linear_params(next_key(), d_in, d_out, name=i):
+                yield name, array
 
     def forward(self, params, x):
         for i in range(len(self.dims)):
-            x = linear(x, params[F"weight{i}"], params[F"bias{i}"])
+            x = linear(x, params[F"linear_w{i}"], params[F"linear_b{i}"])
             if i < self.dims:
                 x = self.activation(x)
         return x
