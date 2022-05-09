@@ -29,6 +29,16 @@ def convnd(x, filters, stride=1, padding='SAME'):
     if type(padding) is int:
         padding = ((padding, padding),) * (len(x.shape) - 2)
     return jax.lax.conv_general_dilated(x, filters, window_strides=stride, padding=padding)
+    
+#q: (head, token, dim)
+#k: (head, token, dim)
+#v: (head, token, dim)
+def attention(q, k, v):
+    k_t = k.transpose(0, 2, 1)
+    attn = jax.vmap(jnp.matmul)(q, k_t)
+    attn = attn / (k.shape[-1] ** 0.5)
+    attn = jax.nn.softmax(attn, axis=-1)
+    return jax.vmap(jnp.matmul)(attn, v)
 
 #x: (dim1, dim2, dim..., dimn)
 def zscore(x, axis=-1, eps=1e-5):
