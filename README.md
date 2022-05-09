@@ -1,6 +1,11 @@
 # jaks
+
+<p align="center">
+    <img width="460" height="300" src="https://raw.githubusercontent.com/ptmorris03/jaks/main/jaks_logo.PNG">
+</p>
+
 ```bash 
-pip install git+https://github.com/ptmorris03/jaks.git
+!pip install git+https://github.com/ptmorris03/jaks.git
 ```
 ```python3
 from dataclasses import dataclass
