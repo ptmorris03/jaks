@@ -67,7 +67,7 @@ class MLP(nn.Module):
     def forward(self, params, x):
         for i in range(len(self.dims)):
             x = linear(x, params[F"linear_w{i}"], params[F"linear_b{i}"])
-            if i < self.dims:
+            if i < len(self.dims) - 1:
                 x = self.activation(x)
         return x
         
