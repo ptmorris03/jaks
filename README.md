@@ -8,9 +8,6 @@
 !pip install git+https://github.com/ptmorris03/jaks.git
 ```
 ```python3
-from dataclasses import dataclass
-from typing import Iterable
-
 import jax
 import jax.numpy as jnp
 
@@ -18,50 +15,60 @@ import jaks
 import jaks.modules as nn
 
 
-@dataclass
-class Linear(nn.Module):
-    in_dims: int
-    out_dims: int
+#x: (dim,)
+#weight: (out, dim)
+#bias: (out,)
+def linear(x, weight, bias):
+    return jnp.matmul(weight, x) + bias
 
-    def modules(self):
-        yield "weight", nn.Rotate(self.in_dims, self.out_dims)
-        yield "bias", nn.Translate(self.out_dims)
+#x: (batch, c, dim1, dim2, ..., dimn)
+#filters: (c_out, c_in, dim1, dim2, ..., dimn)
+def convnd(x, filters, stride=1, padding='SAME'):
+    if type(stride) is int:
+        stride = (stride,) * (len(x.shape) - 2)
+    if type(padding) is int:
+        padding = ((padding, padding),) * (len(x.shape) - 2)
+    return jax.lax.conv_general_dilated(x, filters, window_strides=stride, padding=padding)
+
+#x: (dim1, dim2, dim..., dimn)
+def zscore(x, axis=-1, eps=1e-5):
+    centered = x - x.mean(axis=axis, keepdims=True)
+    deviation = x.std(axis=axis, keepdims=True) + eps
+    return centered / deviation
+
+#x: (dim,)  
+#weight: (dim,)
+#bias: (dim,)
+def layernorm(x, weight, bias):
+    return zscore(x) * weight + bias
+
+def random_init(random_key, shape):
+    return jax.random.normal(random_key, shape) * sqrt(2 / shape[-1])
 
 
 @dataclass
 class MLP(nn.Module):
-    dims: Iterable[int]
-    act_module: Module = nn.RELU()
-    
-    def modules(self):
-        for i in range(len(self.dims) - 1):
-            if i > 0:
-                yield "activation", self.act_module
-            yield F"linear{i + 1}", nn.Linear(self.dims[i], self.dims[i + 1])
-            
+    dims: List[int]
+    activation = jax.nn.relu
 
-@dataclass
-class ResidualGate(nn.Module):
-    module: nn.Module
-    gate_input: bool = False
-        
-    def modules(self):
-        yield "module", self.module
-        
-    def parameters(self, key):
-        yield "gate", jnp.ones(1)
-        
+    def parameters(self, random_key):
+        next_key = jaks.utils.PRNGSplitter(random_key)
+
+        for i, (d_in, d_out) in enumerate(zip(self.dims[:-1], self.dims[1:])):
+            yield F"weight{i}", random_init(next_key(), (d_out, d_in))
+            yield F"bias{i}", jnp.zeros(d_out)
+
     def forward(self, params, x):
-        output = self.module(params, x)
-        gated_output = params["gate"] * output
-        if self.gate_input:
-            x = (1 - params["gate"]) * x
-        return gated_output + x
+        for i in range(len(self.dims)):
+            x = linear(x, params[F"weight{i}"], params[F"bias{i}"])
+            if i < self.dims:
+                x = self.activation(x)
+        return x
         
         
 mlp = MLP([784, 128, 1])
 mlp_fn = mlp.compile(batch=True)
-key, params = mlp_fn.init(key=42)
+key, params = mlp_fn.init(key=4)
 x = jnp.ones((32, 784))
 y, grads = jax.value_and_grad(mlp_fn)(params, x)
 ```
