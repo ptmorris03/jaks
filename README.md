@@ -75,7 +75,7 @@ class MLP(nn.Module):
                 yield name, array
 
     def forward(self, params, x):
-        for i in range(len(self.dims)):
+        for i in range(len(self.dims) - 1):
             x = linear(x, params[F"linear_w{i}"], params[F"linear_b{i}"])
             if i < len(self.dims) - 1:
                 x = self.activation(x)
